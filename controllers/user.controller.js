@@ -47,7 +47,61 @@ const editUser = async (req, res) => {
     }
 }
 
+const deleteUser = async (req, res) => {
+    const {id} = req.params;
+    try {
+        let deletedUser = await UserModel.findByIdAndDelete(id);
+        res.status(200).send({
+            message: "User deleted successfully",
+        })
+    } catch (error) {
+        console.log(error);
+
+        res.status(400).send({
+            message: "User not deleted successfully"
+        })
+        
+    }
+}
+
+const getUser = async (req, res)=>{
+    const {id} = req.params;
+    try {
+        let user = await UserModel.findById(id);
+        res.status(200).send({
+            message: "User retrieved successfully",
+            data: user
+        })
+    } catch (error) {
+        console.log(error);
+
+        res.status(400).send({
+            message: "User not retrieved successfully"
+        })
+        
+    }
+}
+
+const getAllUsers = async (req, res) => {
+    try {
+        let allUsers = await UserModel.find();
+        res.status(200).send({
+            message: "All users retrieved successfully",
+            data: allUsers
+        })
+    } catch (error) {
+        console.log(error);
+
+        res.status(400).send({
+            message: "Users not retrieved successfully"
+        })
+    }
+}
+
 module.exports = {
     createUser,
-    editUser
+    editUser,
+    deleteUser,
+    getUser,
+    getAllUsers
 }
