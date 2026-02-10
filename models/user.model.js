@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-const userSchema=mongoose.Schema({
+const UserSchema=mongoose.Schema({
     firstName:{type: String, required: true},
     lastName:{type: String, required: true},
     email:{type: String, required: true, unique: true},
@@ -10,6 +10,6 @@ const userSchema=mongoose.Schema({
 }, {timestamps: true, strict:"throw"})
 
 
-const UserModel = mongoose.model('User', userSchema)   // user => name of the collection in the database, userSchema => schema for the collection
+const UserModel = mongoose.model('User', UserSchema)   // user => name of the collection in the database, userSchema => schema for the collection
 
 module.exports = UserModel

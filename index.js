@@ -6,6 +6,9 @@ app.set('view engine', 'ejs');
 const dotenv = require('dotenv');
 dotenv.config();
 app.use(express.urlencoded({extended: true}));
+app.use(express.json());
+const UserRouter = require('./routers/user.routes');
+app.use('/api/v1', UserRouter)
 
 // app.get(Path2D, callback)
 // req=>request, res=>response
