@@ -1,4 +1,6 @@
 const UserModel = require("../models/user.model");
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 
 
@@ -51,7 +53,7 @@ const deleteUser = async (req, res) => {
     const {id} = req.params;
     try {
         let deletedUser = await UserModel.findByIdAndDelete(id);
-        res.status(200).send({
+        res.status(204).send({
             message: "User deleted successfully",
         })
     } catch (error) {
@@ -84,7 +86,7 @@ const getUser = async (req, res)=>{
 
 const getAllUsers = async (req, res) => {
     try {
-        let allUsers = await UserModel.find();
+        let allUsers = await UserModel.find().select("-password -roles");
         res.status(200).send({
             message: "All users retrieved successfully",
             data: allUsers

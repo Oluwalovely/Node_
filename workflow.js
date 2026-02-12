@@ -13,3 +13,19 @@
 //post requests
 //deleting items in an array
 //editing items in an array
+
+
+//cluster->database->collection->documents
+
+//connecting to the database
+//saving in to the database
+//getting information from the database
+//editing info from the database
+//delete info in the db
+
+
+//modularization
+
+//cloudinary
+//nodemailer
+//auth and authorization
