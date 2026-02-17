@@ -8,22 +8,77 @@ const createUser = async (req, res) => {
     const { lastName, firstName, email, password } = req.body;
 
     try {
-        const user = await UserModel.create(req.body)
+        const saltround = await bcrypt.genSalt(10)
+
+        const hashedPassword = await bcrypt.hash(password, saltround)
+
+
+        const user = await UserModel.create({firstName, lastName, email, password:hashedPassword});
+
+        const token = await jwt.sign({id:user._id}, process.env.JWT_SECRET, {expiresIn:"5h"})
         res.status(201).send({
             message: "User created successfully",
             data: {
                 lastName,
                 email,
-                firstName
-            }
+                firstName,
+                roles:user.roles
+            },
+            token
         })
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        console.log(error);
 
+        if(error.code == 11000){
+            res.status(400).send({
+            message: "User already registered",
+            })
+        }else{
+            res.status(400).send({
+                message: "Error creating user",
+            })
+        }
+    }
+}
 
-        res.status(400).send({
-            message: "Error creating user",
+const login=async (req, res)=>{
+    const {email, password}=req.body
+    try {
+        const isUser = await UserModel.findOne({email})
+        if (!isUser) {
+            res.status(404).send({
+                message:"Invalid credentials"
+            })
+
+            return
+        } 
+    const isMatch = await bcrypt.compare(password, isUser.password)
+    if(!isMatch){
+        res.status(404).send({
+            message: "Invalid credentials"
         })
+
+        return
+    }
+
+    const token = await jwt.sign({id:isUser._id}, process.env.JWT_SECRET, {expiresIn:"5h"})
+    res.status(200).send({
+        message:"User logged in successfully",
+        data:{
+            email:isUser.email,
+            roles:isUser.roles,
+            firstName:isUser.firstName,
+            lastName:isUser.lastName
+        },
+        token
+    })
+    } catch (error) {
+        console.log(error);
+
+        res.status(404).send({
+            message:"Invalid credentials"
+        })
+        
     }
 }
 
@@ -69,7 +124,7 @@ const deleteUser = async (req, res) => {
 const getUser = async (req, res)=>{
     const {id} = req.params;
     try {
-        let user = await UserModel.findById(id);
+        let user = await UserModel.findById(id).select("-password -roles");
         res.status(200).send({
             message: "User retrieved successfully",
             data: user
@@ -105,5 +160,6 @@ module.exports = {
     editUser,
     deleteUser,
     getUser,
-    getAllUsers
+    getAllUsers,
+    login
 }
