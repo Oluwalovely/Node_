@@ -2,13 +2,18 @@ const express = require('express');
 const app = express();
 const ejs = require('ejs');
 const mongoose = require('mongoose')
+const cors = require('cors');
 app.set('view engine', 'ejs');
 const dotenv = require('dotenv');
 dotenv.config();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(cors());
 const UserRouter = require('./routers/user.routes');
+const ProductRouter = require('./routers/product.routes');
+
 app.use('/api/v1', UserRouter)
+app.use('/api/v1', ProductRouter)
 
 // app.get(Path2D, callback)
 // req=>request, res=>response
