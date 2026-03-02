@@ -1,6 +1,15 @@
 const UserModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+
+let transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.NODE_MAIL,
+    pass: process.env.NODE_PASS,
+  },
+});
 
 const createUser = async (req, res) => {
   const { lastName, firstName, email, password } = req.body;
@@ -30,6 +39,49 @@ const createUser = async (req, res) => {
       },
       token,
     });
+
+    let mailOptions = {
+      from: process.env.NODE_MAIL,
+      to: email,
+      subject: `Welcome ${firstname},to our platform`,
+      html: `<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: Arial, sans-serif; line-height: 1.6; }
+.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
+.content { padding: 20px; }
+.footer { background-color: #f4f4f4; padding: 10px; text-align: center; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>Hello, <%= name %>!</h1>
+</div>
+
+<div class="content">
+<p>Thank you for signing up with <strong><%= companyName %></strong>.</p>
+
+</div>
+
+<div class="footer">
+<p>This email was sent by <%= companyName %> &copy; <%= new Date().getFullYear() %></p>
+</div>
+</div>
+</body>
+</html>`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+
   } catch (error) {
     console.log(error);
 
@@ -142,15 +194,15 @@ const getUser = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-    const user=req.user.roles
+  const user = req.user.roles
   try {
 
-    if(user !=='admin'){
-        res.status(403).send({
-            message:"Forbidden request"
-        })
+    if (user !== 'admin') {
+      res.status(403).send({
+        message: "Forbidden request"
+      })
 
-        return
+      return
     }
     let allUsers = await UserModel.find().select("-password -roles");
     res.status(200).send({
