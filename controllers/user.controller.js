@@ -2,9 +2,12 @@ const UserModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const mailSender = require("../middleware/mailer");
+const otpgen = require("otp-generator");
+const OTPModel = require("../models/otp.model");
 
 let transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: "gmail", 
   auth: {
     user: process.env.NODE_MAIL,
     pass: process.env.NODE_PASS,
@@ -26,9 +29,28 @@ const createUser = async (req, res) => {
       password: hashedPassword,
     });
 
+    const renderMail = await mailSender('welcomeMail.ejs', { firstName, lastName })
+
     const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "5h",
     });
+    
+
+    let mailOptions = {
+      from: process.env.NODE_MAIL,
+      to: email,
+      subject: `Welcome ${firstName},to our platform`,
+      html: renderMail
+    };
+
+    await transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+
     res.status(201).send({
       message: "User created successfully",
       data: {
@@ -38,48 +60,6 @@ const createUser = async (req, res) => {
         roles: user.roles,
       },
       token,
-    });
-
-    let mailOptions = {
-      from: process.env.NODE_MAIL,
-      to: email,
-      subject: `Welcome ${firstname},to our platform`,
-      html: `<!DOCTYPE html>
-<html>
-<head>
-<style>
-body { font-family: Arial, sans-serif; line-height: 1.6; }
-.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-.content { padding: 20px; }
-.footer { background-color: #f4f4f4; padding: 10px; text-align: center; font-size: 12px; }
-</style>
-</head>
-<body>
-<div class="container">
-<div class="header">
-<h1>Hello, <%= name %>!</h1>
-</div>
-
-<div class="content">
-<p>Thank you for signing up with <strong><%= companyName %></strong>.</p>
-
-</div>
-
-<div class="footer">
-<p>This email was sent by <%= companyName %> &copy; <%= new Date().getFullYear() %></p>
-</div>
-</div>
-</body>
-</html>`
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
     });
 
   } catch (error) {
@@ -258,6 +238,43 @@ const getMe = async (req, res) => {
   }
 };
 
+
+const requestOtp = async (req,res) =>{
+  const email = req.body.email
+  try {
+    const sendOTP = otpgen.generate(4, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false, digits: true });
+    //save their otp and mail in the database
+    // send them an email with the otp
+    const user = await OTPModel.create({email, otp: sendOTP})
+
+    const otpMailContent = await mailSender('otpMail.ejs', { otp: sendOTP })
+
+    let mailOptions = {
+      from: process.env.NODE_MAIL,
+      to: email,
+      subject: `Your OTP for Lovelistics`,
+      html: otpMailContent
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).send({
+      message: "OTP sent to email successfully",
+    })
+
+
+  } catch (error) {
+    console.log(error)
+    res.status(400).send({
+      message: "Error sending OTP to email",
+    })
+  }
+}
+
+const forgotPassword = async(req, res) =>{
+
+}
+
 module.exports = {
   createUser,
   editUser,
@@ -266,5 +283,6 @@ module.exports = {
   getAllUsers,
   login,
   verifyUser,
-  getMe
+  getMe,
+  requestOtp,
 };

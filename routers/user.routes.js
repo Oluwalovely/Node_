@@ -1,5 +1,5 @@
 const express = require("express");
-const { createUser, editUser, deleteUser, getUser, getAllUsers, login, verifyUser, getMe } = require("../controllers/user.controller");
+const { createUser, editUser, deleteUser, getUser, getAllUsers, login, verifyUser, getMe, requestOtp } = require("../controllers/user.controller");
 const router  = express.Router();
 
 
@@ -10,5 +10,6 @@ router.get('/allusers',verifyUser, getAllUsers)
 router.get('/getuser/:id', getUser)
 router.post('/login', login)
 router.get('/me', verifyUser, getMe)
+router.get('/request-otp', requestOtp)
 
 module.exports = router;
