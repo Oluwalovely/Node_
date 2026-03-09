@@ -6,7 +6,7 @@ const cors = require('cors');
 app.set('view engine', 'ejs');
 const dotenv = require('dotenv');
 dotenv.config();
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 const UserRouter = require('./routers/user.routes');
@@ -19,13 +19,13 @@ app.use('/api/v1', ProductRouter)
 // req=>request, res=>response
 
 mongoose.connect(process.env.DATABASE_URI)
-.then(() => {
-    console.log('Databse connected succesfully');
-})
-.catch((err)=>{
-    console.log('Error connecting to Database', err);
-    
-})
+    .then(() => {
+        console.log('Databse connected succesfully');
+    })
+    .catch((err) => {
+        console.log('Error connecting to Database', err);
+
+    })
 const products = [
     {
         prodName: 'Laptop',
@@ -88,7 +88,7 @@ const products = [
         prodDescription: "20000mAh power bank with fast charging, dual USB ports, and LED indicator",
     }
 ]
-app.get('/', (req, res)=>{
+app.get('/', (req, res) => {
     // res.send(true)
     // res.send('Emmie','Lovely')
     // res.send(products)
@@ -97,46 +97,46 @@ app.get('/', (req, res)=>{
     res.sendFile(__dirname + '/index.html');
 })
 
-app.get('/index', (req, res)=>{
-    res.render('index', {products})
+app.get('/index', (req, res) => {
+    res.render('index', { products })
 })
 
-app.get('/addProduct', (req, res)=>{
+app.get('/addProduct', (req, res) => {
     res.render("addProduct")
 })
 
-app.post("/addProduct", (req, res)=>{
+app.post("/addProduct", (req, res) => {
     // console.log(req.body);
-    const {prodName, prodPrice, prodImg, prodDesc} = req.body;
+    const { prodName, prodPrice, prodImg, prodDesc } = req.body;
 
     products.push(req.body)
-    res.render("index", {products})
+    res.render("index", { products })
 })
 
-app.post("/deleteProd/:id", (req, res)=>{
+app.post("/deleteProd/:id", (req, res) => {
     // console.log(req.params);
-    const {id} = req.params;
+    const { id } = req.params;
     products.splice(id, 1);
-    res.render("index", {products})
+    res.render("index", { products })
 })
 
-app.get("/editProd/:id", (req, res)=>{
+app.get("/editProd/:id", (req, res) => {
     res.render("editProduct")
 })
 
-app.post("/editProd/:id", (req, res)=>{
-    const {id} = req.params;
-    const {prodName, prodPrice, prodImg, prodDesc} = req.body;
+app.post("/editProd/:id", (req, res) => {
+    const { id } = req.params;
+    const { prodName, prodPrice, prodImg, prodDesc } = req.body;
     products.splice(id, 1, req.body);
-    res.render("index", {products})
+    res.render("index", { products })
 })
 
 
 // app.listen(prompt, callback)
-app.listen(process.env.PORT, (err)=>{
-    if(err){
+app.listen(process.env.PORT, (err) => {
+    if (err) {
         console.log('Error in server startup', err);
-    }else{
+    } else {
         console.log(`Server started successfully`);
     }
 })

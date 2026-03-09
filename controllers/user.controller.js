@@ -7,7 +7,7 @@ const otpgen = require("otp-generator");
 const OTPModel = require("../models/otp.model");
 
 let transporter = nodemailer.createTransport({
-  service: "gmail", 
+  service: "gmail",
   auth: {
     user: process.env.NODE_MAIL,
     pass: process.env.NODE_PASS,
@@ -34,7 +34,7 @@ const createUser = async (req, res) => {
     const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "5h",
     });
-    
+
 
     let mailOptions = {
       from: process.env.NODE_MAIL,
@@ -239,13 +239,13 @@ const getMe = async (req, res) => {
 };
 
 
-const requestOtp = async (req,res) =>{
+const requestOtp = async (req, res) => {
   const email = req.body.email
   try {
     const sendOTP = otpgen.generate(4, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false, digits: true });
     //save their otp and mail in the database
     // send them an email with the otp
-    const user = await OTPModel.create({email, otp: sendOTP})
+    const user = await OTPModel.create({ email, otp: sendOTP })
 
     const otpMailContent = await mailSender('otpMail.ejs', { otp: sendOTP })
 
@@ -256,7 +256,13 @@ const requestOtp = async (req,res) =>{
       html: otpMailContent
     };
 
-    await transporter.sendMail(mailOptions);
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);  
+      }
+    });
 
     res.status(200).send({
       message: "OTP sent to email successfully",
@@ -271,8 +277,8 @@ const requestOtp = async (req,res) =>{
   }
 }
 
-const forgotPassword = async(req, res) =>{
-
+const forgotPassword = async (req, res) => {
+  
 }
 
 module.exports = {
