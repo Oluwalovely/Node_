@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(cors());
 const UserRouter = require('./routers/user.routes');
 const ProductRouter = require('./routers/product.routes');
+const connectDB = require('./database/connectDB');
 
 app.use('/api/v1', UserRouter)
 app.use('/api/v1', ProductRouter)
@@ -18,14 +19,14 @@ app.use('/api/v1', ProductRouter)
 // app.get(Path2D, callback)
 // req=>request, res=>response
 
-mongoose.connect(process.env.DATABASE_URI)
-    .then(() => {
-        console.log('Databse connected succesfully');
-    })
-    .catch((err) => {
-        console.log('Error connecting to Database', err);
+// mongoose.connect(process.env.DATABASE_URI)
+//     .then(() => {
+//         console.log('Databse connected succesfully');
+//     })
+//     .catch((err) => {
+//         console.log('Error connecting to Database', err);
 
-    })
+//     })
 const products = [
     {
         prodName: 'Laptop',
@@ -140,3 +141,10 @@ app.listen(process.env.PORT, (err) => {
         console.log(`Server started successfully`);
     }
 })
+
+
+module.exports = async (req, res) => {
+    await connectDB()
+
+    return app(req, res)
+}
