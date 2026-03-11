@@ -145,6 +145,7 @@ app.listen(process.env.PORT, (err) => {
 
 module.exports = async (req, res) => {
     await connectDB()
-
+    console.log("Database connected successfully");
+    
     return app(req, res)
 }
